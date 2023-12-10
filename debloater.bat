@@ -1,59 +1,106 @@
 @echo off
 setlocal enabledelayedexpansion
 
+cls
 echo ========================================================================================
 echo ============================= Welcome to Android Debloater =============================
 echo ========================================================================================
 echo.
 
-adb devices
-pause
 
-set bloats=miui_bloatware_packages.txt
-set pkg_list_file=packages.pkg
-set uninstall_list_file=uninstall.pkg
-
-echo Gathering list of installed packages...
-adb shell pm list packages -e > %pkg_list_file%
-
-for /f "tokens=*" %%A in (%bloats%) do call :FindPackage %%A
-
-for /f "tokens=*" %%A in (%uninstall_list_file%) do call :Uninstall %%A
+SET BLOATWARE_FILE=bloatware_list/android_google.txt
+SET DEVICE_PACKAGE_FILE=packages.pkg
+SET UNINSTALL_PACKAGE_FILE=uninstall.pkg
 
 
-del %pkg_list_file%
-del %uninstall_list_file%
+echo Select bloatware list to use depending on the OS:
+echo [1] Stock Android with Google Bloatware
+echo [2] MIUI
+set /p option= ": "
+
+
+IF "%option%" EQU "1" (
+	SET BLOATWARE_FILE=bloatware_list/android_google.txt
+) ELSE (
+	IF "%option%" EQU "2" (
+		SET BLOATWARE_FILE=bloatware_list/miui.txt
+	) ELSE (
+		call :Println "Invalid selection"
+		exit /b 1
+	)
+)
+call :Println "Using bloatware file: %BLOATWARE_FILE%"
+
+
+call :Println "Getting Device list..."
+adb devices -l | find "device product:" > nul
+IF "%errorlevel%" EQU "1" (
+    echo No devices found
+	exit /b 0
+)
+
+
+call :Println "Gathering list of installed packages..."
+adb shell pm list packages -e > %DEVICE_PACKAGE_FILE%
+
+
+call :Println "Preparing list of packages to uninstall..."
+call :CheckBloatwarePackages %DEVICE_PACKAGE_FILE%, %BLOATWARE_FILE%, %UNINSTALL_PACKAGE_FILE%
+
+
+call :Println "Uninstalling packages..."
+call :UninstallPackages %UNINSTALL_PACKAGE_FILE%
+
+
+call :Println "Uninstall completed"
+call :Println "Performing Cleanup..."
+del %DEVICE_PACKAGE_FILE%
+del %UNINSTALL_PACKAGE_FILE%
 adb kill-server
 
-pause
-EXIT /B %errorlevel%
 
-
-:FindPackage
-	find "%~1" %pkg_list_file%  > nul && ( echo %~1 >> %uninstall_list_file% )
+:Println
+	echo %~1
+	echo.
 	exit /b 0
-
-
-:Uninstall
-	set pkg_name=%~1
-	echo Processing: %pkg_name%
 	
-	echo Trying uninstall for all users
-	adb shell pm uninstall %pkg_name% > nul
 
-	if %errorlevel% neq 0 (
-		echo Failed
+:CheckBloatwarePackages
+	set DEVICE_PACKAGES=%~1
+    set BLOATWARE_PACKAGES=%~2
+    set OUTPUT_FILE=%~3
+	
+	FOR /f "tokens=*" %%A in (%BLOATWARE_PACKAGES%) do (
+		find "%%A" %DEVICE_PACKAGES%  > nul && ( echo %%A >> %OUTPUT_FILE% )
+	)
+	exit /b 0
+	
 
-		echo Trying uninstall for current user
-		adb shell pm uninstall --user 0 %pkg_name% > nul
+:UninstallPackages
+	SET UNINSTALL_PACKAGES=%~1
+	FOR /f "tokens=*" %%A in (%UNINSTALL_PACKAGES%) do (
 
-		if %errorlevel% neq 0 (
+		echo Processing: %%A
+		echo Trying uninstall for all users
+		adb shell pm uninstall %%A > nul
+
+		IF %errorlevel% NEQ 0 (
 			echo Failed
+			echo Trying uninstall for current user
 
-			echo Trying to disable the app for current user
-			adb shell pm disable-user %pkg_name%
+			adb shell pm uninstall --user 0 %%A > nul
+
+			IF %errorlevel% NEQ 0 (
+				echo Failed
+				echo Trying to disable the app for current user
+				
+				adb shell pm clear %%A > nul
+				adb shell pm disable-user %%A > nul
+			) ELSE (
+				echo Success
+			)
+		) ELSE (
+			echo Success
 		)
 	)
-	echo.
-	echo.
 	exit /b 0

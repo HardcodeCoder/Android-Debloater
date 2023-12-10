@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-
+clear
 echo "================================================================================"
 echo "============================ Welcome to Android Debloater ======================"
 echo "================================================================================"
+echo ""
 
 
-BLOATWARE_FILE=miui_bloatware_packages.txt
+BLOATWARE_FILE=bloatware_list/android_google.txt
 DEVICE_PACKAGE_FILE=packages.pkg
 UNINSTALL_PACKAGE_FILE=uninstall.pkg
 
@@ -46,18 +47,17 @@ function uninstall-packages() {
         echo "Trying to uninstall for all users"
         adb shell pm uninstall $package > /dev/null
 
-        if [ $? -ne 0 ]
-        then
+        if [ $? -ne 0 ]; then
             echo "Failed"
             echo "Trying uninstall for current user"
 
             adb shell pm uninstall --user 0 $package > /dev/null
 
-            if [ $? -ne 0 ]
-            then
+            if [ $? -ne 0 ]; then
                 echo "Failed"
                 echo "Trying to disable the app for current user"
 
+                adb shell pm clear $package > /dev/null
                 adb shell pm disable-user $package > /dev/null
             else
                 echo "Success"
@@ -69,25 +69,44 @@ function uninstall-packages() {
 }
 
 
+echo "Select bloatware list to use depending on the OS:"
+echo "[1] Stock Android with Google Bloatware"
+echo "[2] MIUI"
+echo -n ": "
+read option
+
+
+if [ "$option" -eq 1 ]; then
+    BLOATWARE_FILE=bloatware_list/android_google.txt
+elif [ "$option" -eq 2 ]; then
+    BLOATWARE_FILE=bloatware_list/miui.txt
+else
+    echo "Invalid selection"
+    exit
+fi
+print "Using bloatware file: $BLOATWARE_FILE"
+
+
 print "Getting Device list..."
-adb devices
-sleep 1s
+adb devices | grep -F -w "device"
+if [ $? -ne 0 ]; then
+    print "No devices found"
+    exit
+fi
 
 
 print "Gathering list of installed packages..."
 adb shell pm list packages -e > $DEVICE_PACKAGE_FILE
 sed -i 's/package://' $DEVICE_PACKAGE_FILE
-sleep 1s
 
 
 print "Preparing list of packages to uninstall..."
 check_bloatware_packages $DEVICE_PACKAGE_FILE $BLOATWARE_FILE $UNINSTALL_PACKAGE_FILE
-sleep 1s
 
 
 print "Uninstalling packages..."
 uninstall-packages $UNINSTALL_PACKAGE_FILE
-sleep 1s
+
 
 print "Uninstall completed"
 print "Performing Cleanup..."
