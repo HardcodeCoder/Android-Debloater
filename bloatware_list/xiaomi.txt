@@ -14,6 +14,7 @@ com.android.hotwordenrollment.okgoogle
 com.android.hotwordenrollment.xgoogle
 com.android.stk
 com.android.wallpaperbackup
+com.block.juggle
 com.block.puzzle.game.hippo.mi
 com.caf.fmradio
 com.duokan.phone.remotecontroller
@@ -149,6 +150,7 @@ com.xiaomi.mirror
 com.xiaomi.payment
 com.xiaomi.providers.appindex
 com.xiaomi.simactivate.service
+com.xiaomi.smarthome
 in.amazon.mShop.android.shopping
 in.mohalla.brandprovider
 in.mohalla.sharechat

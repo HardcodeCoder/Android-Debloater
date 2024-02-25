@@ -15,7 +15,7 @@ SET UNINSTALL_PACKAGE_FILE=uninstall.pkg
 
 echo Select bloatware list to use depending on the OS:
 echo [1] Stock Android with Google Bloatware
-echo [2] MIUI
+echo [2] MIUI/HyperOs
 set /p option= ": "
 
 
@@ -23,7 +23,7 @@ IF "%option%" EQU "1" (
 	SET BLOATWARE_FILE=bloatware_list/android_google.txt
 ) ELSE (
 	IF "%option%" EQU "2" (
-		SET BLOATWARE_FILE=bloatware_list/miui.txt
+		SET BLOATWARE_FILE=bloatware_list/xiaomi.txt
 	) ELSE (
 		call :Println "Invalid selection"
 		exit /b 1
