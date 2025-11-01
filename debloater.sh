@@ -14,10 +14,17 @@ UNINSTALL_PACKAGE_FILE=uninstall.pkg
 
 
 # Helper to preety print headers
-function print() {
-    echo ""
+function print_header() {
 	now=$(date +"%I:%M:%S")
 	echo -e "${BOLD}[$now]  $1 ${RESET}"
+}
+
+
+# Helper to preety print messages
+function print_message() {
+	# Prints 12 spaces to match indentation of the header
+    # Aligns the content to header
+	echo "            $1"
 }
 
 
@@ -50,20 +57,20 @@ function uninstall-packages() {
     while read -r package <&3
     do
 
-        print "Processing package: $package"
+        print_header "Processing package: $package"
 
         # Trying to uninstall package system-wide
         adb shell pm uninstall $package > /dev/null
 
         if [ $? -eq 0 ]; then
-            echo "Successfully uninstalled"
+            print_message "Successfully uninstalled"
         else
 
             # Trying to uninstall package for current user
             adb shell pm uninstall --user 0 $package > /dev/null
 
             if [ $? -eq 0 ]; then
-                echo "Successfully uninstalled for current user"
+                print_message "Successfully uninstalled for current user"
             else
 
                 # Uninstalling failed, try to disable package
@@ -71,13 +78,14 @@ function uninstall-packages() {
                 adb shell pm disable-user $package > /dev/null
 
                 if [ $? -eq 0 ]; then
-                    echo "Successfully disabled for current user"
+                    print_message "Successfully disabled for current user"
                 else
-                    echo "Failed to process package"
+                    print_message "Failed to process package"
                 fi
             fi
         fi
 
+        echo ""
     done 3< $UNINSTALL_PACKAGES
 }
 
@@ -99,40 +107,50 @@ else
     echo "Invalid selection"
     exit
 fi
-print "Using bloatware file: $BLOATWARE_FILE"
+echo ""
+
+
+print_header "Using bloatware file: $BLOATWARE_FILE"
+echo ""
 
 
 # Check if we have any connected devices
-print "Getting Device list..."
-adb devices | grep -F -w "device"
-if [ $? -ne 0 ]; then
-    print "No devices found"
+print_header "Getting Device list..."
+DEVICE_ID=$(adb shell getprop ro.serialno)
+if [ $? -eq 0 ]; then
+    print_message "Found: $DEVICE_ID"
+else
     exit
 fi
+echo ""
 
 
 # Fetch list of enabled packages from current device
-print "Gathering list of installed packages..."
+print_header "Gathering list of installed packages..."
 adb shell pm list packages -e > $DEVICE_PACKAGE_FILE
 sed -i 's/package://' $DEVICE_PACKAGE_FILE
+echo ""
 
 
 # Find bloatware packages installed in the current device
-print "Preparing list of packages to uninstall..."
+print_header "Preparing list of packages to uninstall..."
 check_bloatware_packages $DEVICE_PACKAGE_FILE $BLOATWARE_FILE $UNINSTALL_PACKAGE_FILE
+echo ""
 
 
 # Unintsall detected bloatware packages
-print "Uninstalling packages..."
+print_header "Uninstalling packages..."
+echo ""
 uninstall-packages $UNINSTALL_PACKAGE_FILE
-print "Uninstall completed"
+print_header "Done"
+echo ""
 
 
 # Perform cleanup and exit
-print "Performing Cleanup..."
+print_header "Performing Cleanup..."
 rm -f $DEVICE_PACKAGE_FILE
 rm -f $UNINSTALL_PACKAGE_FILE
 
 
 # Stop adb server
-adb kill-server > /dev/null
+adb kill-server
