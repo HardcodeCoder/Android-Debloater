@@ -109,6 +109,7 @@ com.sec.android.app.chromecustomizations
 com.sec.android.app.kidshome
 com.sec.android.app.parser
 com.sec.android.app.personalization
+com.sec.android.app.samsungapps
 com.sec.android.app.sbrowser
 com.sec.android.app.SecSetupWizard
 com.sec.android.app.shealth
