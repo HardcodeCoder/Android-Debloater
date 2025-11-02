@@ -10,14 +10,10 @@ com.android.fmradio
 com.android.google.feedback
 com.android.hotwordenrollment.okgoogle
 com.android.hotwordenrollment.xgoogle
-com.android.stk
 com.android.wallpaperbackup
 com.google.android.apps.chromecast.app
-com.google.android.apps.docs
 com.google.android.apps.googleassistant
 com.google.android.apps.magazines
-com.google.android.apps.maps
-com.google.android.apps.messaging
 com.google.android.apps.nbu.files
 com.google.android.apps.nbu.paisa.user
 com.google.android.apps.photos
@@ -35,7 +31,6 @@ com.google.android.feedback
 com.google.android.googlequicksearchbox
 com.google.android.marvin.talkback
 com.google.android.music
-com.google.android.printservice.recommendation
 com.google.android.projection.gearhead
 com.google.android.setupwizard
 com.google.android.tts
