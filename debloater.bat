@@ -17,23 +17,35 @@ SET UNINSTALL_PACKAGE_FILE=uninstall.pkg
 :: Option for the user to determine bloatware list to use
 echo Select bloatware list to use depending on the OS:
 echo [1] Stock Android with Google Bloatware
-echo [2] MIUI/HyperOs
+echo [2] Xiaomi MIUI/HyperOs
+echo [3] Samsung OneUI
 set /p option= ": "
+echo.
 
 
 :: Configure correct bloatware list to use based on user selection
-IF "%option%" EQU "1" (
-	SET BLOATWARE_FILE=bloatware_list/android_google.txt
-) ELSE (
-	IF "%option%" EQU "2" (
-		SET BLOATWARE_FILE=bloatware_list/xiaomi.txt
-	) ELSE (
-		echo Invalid selection
-		echo.
-		exit /b 1
-	)
-)
+IF "%option%" EQU "1" GOTO :Android
+IF "%option%" EQU "2" GOTO :Xiaomi
+IF "%option%" EQU "3" GOTO :Samsung
+
+:: Fall-through for invalid selection
+echo Invalid selection
 echo.
+exit /b 1
+
+:Android
+    SET BLOATWARE_FILE=bloatware_list/android_google.txt
+    GOTO :CONTINUE
+
+:Xiaomi
+    SET BLOATWARE_FILE=bloatware_list/xiaomi.txt
+    GOTO :CONTINUE
+
+:Samsung
+    SET BLOATWARE_FILE=bloatware_list/samsung.txt
+    GOTO :CONTINUE
+
+:CONTINUE
 
 
 call :PrintHeader "Using bloatware file: %BLOATWARE_FILE%"
@@ -100,7 +112,7 @@ GOTO :EOF
 :PrintMessage
 	:: Prints 12 spaces to match indentation of the header
 	:: Aligns the content to header
-    echo             %~1
+    echo            %~1
 	exit /b 0
 
 

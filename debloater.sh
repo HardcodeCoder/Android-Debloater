@@ -93,7 +93,8 @@ function uninstall-packages() {
 # Option for the user to determine bloatware list to use
 echo "Select bloatware list to use depending on the OS:"
 echo "[1] Stock Android with Google Bloatware"
-echo "[2] MIUI/HyperOs"
+echo "[2] Xiaomi MIUI/HyperOs"
+echo "[3] Samsung OneUI"
 echo -n ": "
 read option
 
@@ -103,6 +104,8 @@ if [ "$option" -eq 1 ]; then
     BLOATWARE_FILE=bloatware_list/android_google.txt
 elif [ "$option" -eq 2 ]; then
     BLOATWARE_FILE=bloatware_list/xiaomi.txt
+elif [ "$option" -eq 3 ]; then
+    BLOATWARE_FILE=bloatware_list/samsung.txt
 else
     echo "Invalid selection"
     exit
