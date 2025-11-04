@@ -85,6 +85,7 @@ com.samsung.android.kidsinstaller
 com.samsung.android.oneconnect
 com.samsung.android.rampart
 com.samsung.android.rubin.app
+com.samsung.android.samsungpass
 com.samsung.android.samsungpassautofill
 com.samsung.android.samsungpositioning
 com.samsung.android.scpm
